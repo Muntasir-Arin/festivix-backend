@@ -1,4 +1,4 @@
-// api/routes/userRoutes.js
+require('dotenv').config();
 const express = require('express');
 const userController = require('../controllers/userController');
 const { verifyToken, checkRole } = require('../middleware/authMiddleware');

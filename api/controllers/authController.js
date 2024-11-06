@@ -1,4 +1,4 @@
-// api/controllers/authController.js
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -9,8 +9,7 @@ const authController = {
     // User registration
     register: async (req, res) => {
         try {
-            const { username, email, password, role } = req.body;
-
+            const { username, email, password} = req.body;
             // Check if user already exists
             const existingUser = await User.findOne({ email });
             if (existingUser) {
@@ -28,18 +27,20 @@ const authController = {
                 username,
                 email,
                 password: hashedPassword,
-                role: role || 'User', // Default role to 'User'
+                role: 'User', // Default role to 'User'
                 isVerified: false,
                 verificationToken,
             });
 
             // Send verification email
-            sendVerificationEmail(email, verificationToken);
+            // sendVerificationEmail(email, verificationToken);
 
             res.status(201).json({ message: 'User registered, verification email sent' });
+            console.log('User registered')
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error registering user' });
+            console.log('Error registering user')
         }
     },
 
@@ -55,9 +56,9 @@ const authController = {
             }
 
             // Check if the user is verified
-            if (!user.isVerified) {
-                return res.status(401).json({ message: 'Account not verified' });
-            }
+            // if (!user.isVerified) {
+            //     return res.status(401).json({ message: 'Account not verified' });
+            // }
 
             // Compare passwords
             const isPasswordValid = await bcrypt.compare(password, user.password);

@@ -8,8 +8,11 @@ connectToDatabase();
 
 app.get('/muntasir', (req, res) => {
   const randomNumber = Math.floor(Math.random() * 100) + 1;
-  res.json({ message: `Hello, Muntasir!`, randomNumber: randomNumber });
+  res.json({ message: `Hello`, randomNumber: randomNumber });
 });
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 app.listen(3001, () => console.log("Server ready on port 3000."));
 

@@ -1,4 +1,4 @@
-// api/controllers/userController.js
+require('dotenv').config();
 const User = require('../models/User');
 
 // Get user profile

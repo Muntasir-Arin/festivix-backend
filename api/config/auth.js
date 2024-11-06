@@ -1,4 +1,4 @@
-// api/config/auth.js
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 const generateToken = (userId) => {
