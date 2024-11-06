@@ -1,5 +1,8 @@
 const express = require('express');
+const connectToDatabase = require('./config/db');
 const app = express();
+app.use(express.json());
+connectToDatabase();
 
 app.get('/muntasir', (req, res) => {
   const randomNumber = Math.floor(Math.random() * 100) + 1;
