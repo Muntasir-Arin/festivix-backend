@@ -19,6 +19,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 // app.use('/api/events', eventRoutes );
 
-app.listen(8000, () => console.log("Server ready on port 8000."));
+const port = process.env.PORT || 8000;  // Use the PORT from environment variables, or default to 8000
+app.listen(port, () => {
+  console.log(`Server ready on port ${port}`);
+});
 
 module.exports = app;
