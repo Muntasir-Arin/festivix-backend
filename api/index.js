@@ -10,9 +10,8 @@ app.use(express.json());
 app.use(cors());
 connectToDatabase();
 
-app.get('/muntasir', (req, res) => {
-  const randomNumber = Math.floor(Math.random() * 100) + 1;
-  res.json({ message: `Hello`, randomNumber: randomNumber });
+app.get('/', (req, res) => {
+  res.json({ msg: `Greetings from Muntasir!` });
 });
 
 app.use('/api/auth', authRoutes);
