@@ -18,7 +18,7 @@ const eventSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['Concert', 'Conference', 'Sports', 'Theatre', 'Other'], // Example categories
+        enum: ['Concert', 'Conference', 'Sports', 'Theatre', 'Festival'], 
     },
     venueTemplate: String,
     startDate: {
