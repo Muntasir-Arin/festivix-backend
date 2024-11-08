@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { generateToken } = require('../config/auth');
-const sendVerificationEmail = require('../utils/email');
+const {sendVerificationEmail} = require('../utils/email');
 
 const authController = {
     // User registration
@@ -22,7 +22,6 @@ const authController = {
 
             // Create verification token
             const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '24h' });
-
             // Create and save new user
             const user = await User.create({
                 username,
@@ -34,7 +33,7 @@ const authController = {
             });
 
             // Send verification email
-            // sendVerificationEmail(email, verificationToken);
+            sendVerificationEmail(user, verificationToken);
 
             res.status(201).json({ message: 'User registered, verification email sent' });
             console.log(`[REGISTER-201] User registered and verification email sent: ${email}`);
@@ -58,9 +57,9 @@ const authController = {
             }
 
             // Check if the user is verified
-            // if (!user.isVerified) {
-            //     return res.status(401).json({ message: 'Account not verified' });
-            // }
+            if (!user.isVerified) {
+                return res.status(401).json({ message: 'Account not verified' });
+            }
 
             // Compare passwords
             const isPasswordValid = await bcrypt.compare(password, user.password);
