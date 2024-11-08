@@ -104,6 +104,34 @@ const authController = {
             res.status(500).json({ message: 'Verification failed' });
         }
     },
+
+    verifyRole: async (req, res) => {
+        try {
+            // Get the token from the authorization header
+            const token = req.headers['authorization']?.split(' ')[1]; // Extract token from "Bearer <token>"
+            if (!token) {
+                console.log('[VERIFY_ROLE-400] Token missing');
+                return res.status(400).json({ message: 'Authorization token missing' });
+            }
+
+            // Verify the token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            
+            // Find user by ID from decoded token
+            const user = await User.findById(decoded.id);
+            if (!user) {
+                console.log(`[VERIFY_ROLE-404] User not found: ${decoded.id}`);
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Return the user's role
+            res.json({ role: user.role });
+            console.log(`[VERIFY_ROLE-200] User role retrieved successfully for user: ${decoded.id}`);
+        } catch (error) {
+            console.error(`[VERIFY_ROLE-500] Error verifying role: ${error.message}`);
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
 };
 
 module.exports = authController;
