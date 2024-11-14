@@ -9,7 +9,7 @@ const authController = {
     // User registration
     register: async (req, res) => {
         try {
-            const { username, email, password} = req.body;
+            const { username, email, password, country} = req.body;
             // Check if user already exists
             const existingUser = await User.findOne({ email });
             if (existingUser) {
@@ -26,6 +26,7 @@ const authController = {
             const user = await User.create({
                 username,
                 email,
+                country,
                 password: hashedPassword,
                 role: 'User', // Default role to 'User'
                 isVerified: false,
@@ -67,6 +68,26 @@ const authController = {
                 console.log(`[LOGIN-400] Login failed - Invalid credentials for: ${email}`);
                 return res.status(400).json({ message: 'Invalid credentials' });
             }
+
+            // Check account status
+        if (user.status === 'Temporarily Suspended') {
+            if (user.suspendUntil && user.suspendUntil > new Date()) {
+                return res.status(403).json({
+                    message: `Your account is temporarily suspended until ${user.suspendUntil.toLocaleDateString()}. If you believe this is an error, please contact muntasirarin@gmail.com.`
+                });
+            } else {
+                // Update status to Active if suspension period has passed
+                user.status = 'Active';
+                user.suspendUntil = null;
+                await user.save();
+            }
+        } else if (user.status === 'Permanently Suspended') {
+            return res.status(403).json({
+                message: 'Your account has been permanently suspended. If you believe this is an error, please contact muntasirarin@gmail.com.'
+            });
+        }
+            user.lastLogin = new Date();
+            await user.save();
 
             // Generate token and respond
             const token = generateToken(user._id);
