@@ -3,7 +3,8 @@ const cors = require('cors');
 const connectToDatabase = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-// const eventRoutes = require('./routes/eventRoutes');
+const applyManagerRoutes = require('./routes/applyManagerRoutes');
+
 
 const app = express();
 app.use(express.json());
@@ -16,9 +17,9 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-// app.use('/api/events', eventRoutes );
+app.use('/api/applymanager', applyManagerRoutes );
 
-const port = process.env.PORT || 8000;  // Use the PORT from environment variables, or default to 8000
+const port = process.env.PORT || 8000;  
 app.listen(port, () => {
   console.log(`Server ready on port ${port}`);
 });

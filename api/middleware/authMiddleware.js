@@ -22,6 +22,13 @@ exports.verifyToken = (req, res, next) => {
     }
 };
 
+exports.adminOrModerator = (req, res, next) => {
+    if (!['Admin', 'Moderator'].includes(req.user.role)) {
+      return res.status(403).json({ message: 'Access denied. Admin or Moderator role required.' });
+    }
+    next();
+  };
+
 // Role-based access control
 exports.checkRole = (...roles) => async (req, res, next) => {
     try {
