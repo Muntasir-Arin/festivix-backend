@@ -25,8 +25,6 @@ const userSchema = new mongoose.Schema({
     }],
     lastLogin: { type: Date },
     twoFactorEnabled: { type: Boolean, default: false },
-    otp: { type: String, required: true },
-    otpExpiresAt: { type: Date, required: true },
 
 }, { timestamps: true });
 

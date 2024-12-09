@@ -13,7 +13,7 @@ router.post('/login', authController.login);
 // Verify account route
 router.get('/verify/:token', authController.verifyAccount);
 router.get('/verifyrole', authController.verifyRole);
-router.get('/2fa', authController.twoFA);
+router.post('/verify2fa', authController.verify2FA);
 
 
 module.exports = router;

@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { generateToken } = require('../config/auth');
-const {sendVerificationEmail} = require('../utils/email');
+const {sendVerificationEmail, sendTwoFactorCode} = require('../utils/email');
 
 const authController = {
     // User registration
@@ -98,7 +98,7 @@ const authController = {
             const twoFactorToken = jwt.sign(jwtPayload, process.env.JWT_SECRET);
 
             // Send the 2FA code via email
-            await sendVerificationEmail(user.email, twoFactorCode);
+            sendTwoFactorCode(user, twoFactorCode);
 
             return res.status(200).json({
                 message: '2FA required. Please check your email for the verification code.',
@@ -110,7 +110,7 @@ const authController = {
 
             // Generate token and respond
             const token = generateToken(user._id);
-            res.json({ token, message: 'Login successful' });
+            res.status(200).json({ token, message: 'Login successful' });
             console.log(`[LOGIN-200] Login successful for user: ${email}`);
         } catch (error) {
             console.error(`[LOGIN-500] Error logging in: ${error.message}`);
@@ -120,15 +120,13 @@ const authController = {
 
     verify2FA: async (req, res) => {
         try {
-            const { twoFactorToken, code } = req.body;
-    
+            const { twoFactorToken, code } = req.body;    
             // Verify the 2FA token
             const payload = jwt.verify(twoFactorToken, process.env.JWT_SECRET);
     
-            if (!payload || payload.twoFactorCode !== code) {
+            if (!payload || (String(payload.twoFactorCode) !== String(code))) {
                 return res.status(400).json({ message: 'Invalid or expired 2FA code.' });
             }
-    
             // Find the user by email
             const user = await User.findOne({ email: payload.email });
             if (!user) {
@@ -176,24 +174,7 @@ const authController = {
         }
     },
 
-    twoFA: async (req, res) => {
-        const {enable2FA } = req.body;
-    
-        try {
-            const user = await User.findById(req.user.id);
-            if (!user) {
-                return res.status(404).json({ success: false, error: 'User not found.' });
-            }
-    
-            user.twoFactorEnabled = enable2FA;
-            await user.save();
-    
-            res.status(200).json({ success: true, message: `2FA ${enable2FA ? 'enabled' : 'disabled'} successfully.` });
-        } catch (err) {
-            res.status(500).json({ success: false, error: 'Failed to update 2FA settings.' });
-        }
-    },
-
+   
     verifyRole: async (req, res) => {
         try {
             // Get the token from the authorization header
