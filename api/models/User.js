@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
         reason: { type: String, maxlength: 200 }
     }],
     lastLogin: { type: Date },
+    twoFactorEnabled: { type: Boolean, default: false },
+    otp: { type: String, required: true },
+    otpExpiresAt: { type: Date, required: true },
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

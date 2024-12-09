@@ -86,6 +86,25 @@ const authController = {
                 message: 'Your account has been permanently suspended. If you believe this is an error, please contact muntasirarin@gmail.com.'
             });
         }
+        // Check if 2FA is enabled
+        if (user.twoFactorEnabled) {
+            const twoFactorCode = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit code
+            const jwtPayload = {
+                email: user.email,
+                twoFactorCode,
+                exp: Math.floor(Date.now() / 1000) + 300, // JWT expires in 5 minutes
+            };
+
+            const twoFactorToken = jwt.sign(jwtPayload, process.env.JWT_SECRET);
+
+            // Send the 2FA code via email
+            await sendVerificationEmail(user.email, twoFactorCode);
+
+            return res.status(200).json({
+                message: '2FA required. Please check your email for the verification code.',
+                twoFactorToken,
+            });
+        }
             user.lastLogin = new Date();
             await user.save();
 
@@ -98,6 +117,38 @@ const authController = {
             res.status(500).json({ message: 'Error logging in' });
         }
     },
+
+    verify2FA: async (req, res) => {
+        try {
+            const { twoFactorToken, code } = req.body;
+    
+            // Verify the 2FA token
+            const payload = jwt.verify(twoFactorToken, process.env.JWT_SECRET);
+    
+            if (!payload || payload.twoFactorCode !== code) {
+                return res.status(400).json({ message: 'Invalid or expired 2FA code.' });
+            }
+    
+            // Find the user by email
+            const user = await User.findOne({ email: payload.email });
+            if (!user) {
+                return res.status(400).json({ message: 'User not found.' });
+            }
+    
+            // Mark the user as logged in and update the last login
+            user.lastLogin = new Date();
+            await user.save();
+    
+            // Generate the main JWT token for the session
+            const token = generateToken(user._id);
+    
+            return res.status(200).json({ token, message: 'Login successful.' });
+        } catch (error) {
+            console.error(`[2FA-500] Error verifying 2FA: ${error.message}`);
+            res.status(500).json({ message: 'Error verifying 2FA.' });
+        }
+    },
+    
 
     // Verify user account
     verifyAccount: async (req, res) => {
@@ -122,6 +173,24 @@ const authController = {
         } catch (error) {
             console.error(`[VERIFY-500] Verification failed: ${error.message}`);
             res.status(500).json({ message: 'Verification failed' });
+        }
+    },
+
+    twoFA: async (req, res) => {
+        const {enable2FA } = req.body;
+    
+        try {
+            const user = await User.findById(req.user.id);
+            if (!user) {
+                return res.status(404).json({ success: false, error: 'User not found.' });
+            }
+    
+            user.twoFactorEnabled = enable2FA;
+            await user.save();
+    
+            res.status(200).json({ success: true, message: `2FA ${enable2FA ? 'enabled' : 'disabled'} successfully.` });
+        } catch (err) {
+            res.status(500).json({ success: false, error: 'Failed to update 2FA settings.' });
         }
     },
 
