@@ -4,9 +4,10 @@ const connectToDatabase = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const applyManagerRoutes = require('./routes/applyManagerRoutes');
+const campaignRoutes = require('./routes/campaignRoutes');
 
 // Import the campaign routes
-const campaignRoutes = require('./routes/campaignRoutes');
+// const campaignRoutes = require('./routes/campaignRoutes');
 
 const app = express();
 app.use(express.json());
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/applymanager', applyManagerRoutes );
+// app.use('/api/campaigns', campaignRoutes);
 app.use('/api/campaigns', campaignRoutes);
 
 const port = process.env.PORT || 8000;  
