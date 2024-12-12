@@ -1,12 +1,16 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 const connectToDatabase = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const applyManagerRoutes = require('./routes/applyManagerRoutes');
-
-
+const socketSetup = require('./socket');
 const app = express();
+const server = http.createServer(app);
+socketSetup(server);
+
 app.use(express.json());
 app.use(cors());
 connectToDatabase();
