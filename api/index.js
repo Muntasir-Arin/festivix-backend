@@ -6,6 +6,7 @@ const connectToDatabase = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const applyManagerRoutes = require('./routes/applyManagerRoutes');
+const eventRoutes = require('./routes/eventRoutes')
 const socketSetup = require('./socket');
 const app = express();
 const server = http.createServer(app);
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/applymanager', applyManagerRoutes );
+app.use('/api/event', eventRoutes );
 
 const port = process.env.PORT || 8000;  
 app.listen(port, () => {
