@@ -10,7 +10,6 @@ const eventSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Concert', 'Conference', 'Sports', 'Workshop', 'Exhibition', 'Theater', 'Other'], // Predefined categories
   },
   description: {
     type: String,
@@ -34,16 +33,24 @@ const eventSchema = new mongoose.Schema({
     required: false, // Optional image for event
   },
   ageRestriction: {
-    type: Number,
-    default: 0, // 0 means no restriction
+    type: String,
+    required: true,
+    enum: ['Allow All', '13+', '18+']
   },
   ticketSellStart: {
     type: Date,
     required: true,
   },
+  ticketSellEnd: {
+    type: Date,
+    required: true
+  },
+  earlyBirdEnabled: {
+    type: Boolean,
+    default: false
+  },
   earlyBirdStart: {
     type: Date,
-    default: new Date('3024-01-01'), // Default future date
   },
   earlyBirdEnd: {
     type: Date,
@@ -72,13 +79,22 @@ const eventSchema = new mongoose.Schema({
     default: false,
   },
   dynamicPriceAdjustment: {
-    type: Number, // Adjustment percentage (e.g., 10 for +10%)
+    type: Number, 
     default: 0,
   },
-  venueType: {
+  venueLayout: {
     type: String,
-    enum: ['Indoor', 'Outdoor', 'Hybrid', 'Virtual'],
     required: true,
+  },
+  location: {
+    type: String,
+    required: true
+  },
+  refundPercentage: {
+    type: Number,
+    required: true,
+    min: 50,
+    max: 100
   },
   createdAt: {
     type: Date,
