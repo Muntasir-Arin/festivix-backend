@@ -28,7 +28,7 @@ exports.getAllApplications = async (req, res) => {
   try {
     const applications = await ManagerApplication.find()
       .populate('user', 'username email')
-      .populate('checkBy', 'username')
+      .populate('checkedBy', 'username')
       .sort({ applicationDate: -1 });
 
     res.json({ applications });
@@ -40,9 +40,9 @@ exports.getAllApplications = async (req, res) => {
 
 exports.reviewApplication = async (req, res) => {
   try {
-    const { applicationId, status, checkDate } = req.body;
+    const { applicationId, status } = req.body;
     const checkBy = req.user._id;
-
+    const checkDate = Date.now();
     if (!['Approved', 'Declined'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status value.' });
     }
@@ -52,7 +52,7 @@ exports.reviewApplication = async (req, res) => {
       return res.status(404).json({ message: 'Application not found.' });
     }
     application.applicationStatus = status;
-    application.checkBy = checkBy;
+    application.checkedBy = checkBy;
     application.checkDate = checkDate || Date.now(); 
     await application.save();
     if (status === 'Approved') {
