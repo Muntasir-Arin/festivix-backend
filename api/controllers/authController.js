@@ -1,9 +1,10 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { generateToken } = require('../config/auth');
-const {sendVerificationEmail, sendTwoFactorCode} = require('../utils/email');
+const {sendVerificationEmail, sendTwoFactorCode, sendResetPasswordEmail} = require('../utils/email');
 
 const authController = {
     // User registration
@@ -201,7 +202,71 @@ const authController = {
             console.error(`[VERIFY_ROLE-500] Error verifying role: ${error.message}`);
             res.status(500).json({ message: 'Server error' });
         }
-    }
+    },
+
+    requestPasswordReset: async (req, res) => {
+        try {
+            const { email } = req.body;
+
+            // Find the user by email
+            const user = await User.findOne({ email });
+            if (!user) {
+                console.log(`[RESET-REQUEST-404] Password reset requested for non-existent user: ${email}`);
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Generate a reset token and expiry
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // Token valid for 15 minutes
+
+            // Save the reset token and expiry to the user
+            user.resetPasswordToken = resetToken;
+            user.resetPasswordTokenExpiry = resetTokenExpiry;
+            await user.save();
+
+            // Send the reset password email
+            sendResetPasswordEmail(user, resetToken);
+
+            res.status(200).json({ message: 'Password reset email sent' });
+            console.log(`[RESET-REQUEST-200] Password reset email sent to: ${email}`);
+        } catch (error) {
+            console.error(`[RESET-REQUEST-500] Error requesting password reset: ${error.message}`);
+            res.status(500).json({ message: 'Error requesting password reset' });
+        }
+    },
+
+    resetPassword: async (req, res) => {
+        try {
+            const { resetToken, newPassword } = req.body;
+
+            // Find user by reset token and ensure it's not expired
+            const user = await User.findOne({
+                resetPasswordToken: resetToken,
+                resetPasswordTokenExpiry: { $gt: new Date() }, // Ensure token is not expired
+            });
+
+            if (!user) {
+                console.log(`[RESET-VERIFY-400] Invalid or expired reset token`);
+                return res.status(400).json({ message: 'Invalid or expired reset token' });
+            }
+
+            // Hash the new password
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            // Update the user's password and clear reset token fields
+            user.password = hashedPassword;
+            user.resetPasswordToken = null;
+            user.resetPasswordTokenExpiry = null;
+            await user.save();
+
+            res.status(200).json({ message: 'Password reset successfully' });
+            console.log(`[RESET-VERIFY-200] Password reset successfully for user: ${user.email}`);
+        } catch (error) {
+            console.error(`[RESET-VERIFY-500] Error resetting password: ${error.message}`);
+            res.status(500).json({ message: 'Error resetting password' });
+        }
+    },
+
 };
 
 module.exports = authController;

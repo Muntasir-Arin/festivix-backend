@@ -14,6 +14,8 @@ router.post('/login', authController.login);
 router.get('/verify/:token', authController.verifyAccount);
 router.get('/verifyrole', authController.verifyRole);
 router.post('/verify2fa', authController.verify2FA);
+router.post('/verifyreset', authController.resetPassword);
+router.post('/reset-request', authController.requestPasswordReset);
 
 
 module.exports = router;

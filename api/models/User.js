@@ -25,6 +25,8 @@ const userSchema = new mongoose.Schema({
     }],
     lastLogin: { type: Date },
     twoFactorEnabled: { type: Boolean, default: false },
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordTokenExpiry: { type: Date, default: null },
 
 }, { timestamps: true });
 

@@ -12,4 +12,5 @@ router.patch('/updateprofile', verifyToken, userController.updateProfile);
 // Example of an admin-only route
 router.get('/admin', verifyToken, checkRole('Admin'), userController.adminAccess);
 
+
 module.exports = router;
