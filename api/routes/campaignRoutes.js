@@ -1,17 +1,22 @@
 const express = require('express');
 const router = express.Router();
 
-// Example route for creating a campaign
-router.post('/', (req, res) => {
-  const { name, description, startDate, endDate } = req.body;
-  // Add logic to save campaign data to the database
-  res.status(201).json({ message: 'Campaign created successfully' });
-});
+// Import the controller
+const campaignController = require('../controllers/campaignController');
 
-// Example route for fetching all campaigns
-router.get('/', (req, res) => {
-  // Add logic to fetch campaigns from the database
-  res.json({ campaigns: [] }); // Replace with actual campaigns data
+// Route to create a new campaign
+router.post('/', campaignController.createCampaign);
+
+// Example route for fetching all campaigns (if needed)
+router.get('/', async (req, res) => {
+  try {
+    // Logic to fetch all campaigns from the database
+    const campaigns = await Campaign.find();
+    res.json({ campaigns });
+  } catch (error) {
+    console.error('Error fetching campaigns:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 module.exports = router;

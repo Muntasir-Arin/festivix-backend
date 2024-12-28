@@ -6,6 +6,7 @@ const campaignSchema = new mongoose.Schema({
   description: { type: String },
   emailList: { type: [String], required: true }, // List of emails
   createdAt: { type: Date, default: Date.now },
+  coupon: { type: Number }, // Corrected to Number
 });
 
 module.exports = mongoose.model('Campaign', campaignSchema);

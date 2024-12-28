@@ -1,32 +1,17 @@
 const express = require('express');
-const cors = require('cors');
-const http = require('http');
-const socketIo = require('socket.io');
-const connectToDatabase = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const applyManagerRoutes = require('./routes/applyManagerRoutes');
-
+const bodyParser = require('body-parser');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 
 const app = express();
-const server = http.createServer(app);
-socketSetup(server);
 
-app.use(express.json());
-app.use(cors());
-connectToDatabase();
+// Middleware
+app.use(bodyParser.json()); // To parse incoming JSON data
 
-app.get('/', (req, res) => {
-  res.json({ msg: `Greetings from Muntasir!` });
+// Use the feedback route
+app.use('/api', feedbackRoutes);
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/applymanager', applyManagerRoutes );
-
-const port = process.env.PORT || 8000;  
-app.listen(port, () => {
-  console.log(`Server ready on port ${port}`);
-});
-
-module.exports = app;
